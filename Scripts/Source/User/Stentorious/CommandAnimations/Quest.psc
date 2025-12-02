@@ -24,6 +24,9 @@ Group Mod
 	Idle Property CompanionCommand_Go Auto Const Mandatory
 	Idle Property CompanionCommand_Follow Auto Const Mandatory
 	Idle Property CompanionCommand_Interact Auto Const Mandatory
+	; sound
+	Sound Property CompanionCommandFoley_Default Auto Const Mandatory
+	Sound Property CompanionCommandFoley_Power Auto Const Mandatory
 EndGroup
 
 Group Public
@@ -99,7 +102,7 @@ EndEvent
 ;    9 - Heal
 Event ReferenceAlias.OnCommandModeGiveCommand(ReferenceAlias akSender, int aeCommandType, ObjectReference akTarget)
 
-	Debug.Trace("Companion Command Animations: Give Command " + aeCommandType + " to " + akSender.GetActorReference())
+	;Debug.Trace("Companion Command Animations: Give Command " + aeCommandType + " to " + akSender.GetActorReference())
 
 	; Handle generic actor commands
 	actor kCommandActor = akSender.GetActorReference()
@@ -126,28 +129,38 @@ Event ReferenceAlias.OnCommandModeGiveCommand(ReferenceAlias akSender, int aeCom
 	endif
 
 	; Play idle
+	Idle idleAnim = NONE
 	if aeCommandType == 2
-		PlayerRef.PlayIdle(CompanionCommand_Follow)
+		idleAnim = CompanionCommand_Follow
 	elseif aeCommandType == 3
-		PlayerRef.PlayIdle(CompanionCommand_Go)
+		idleAnim = CompanionCommand_Go
 	elseif aeCommandType == 4
-		PlayerRef.PlayIdle(CompanionCommand_Attack)
+		idleAnim = CompanionCommand_Attack
 	elseif aeCommandType == 5 || aeCommandType == 6
-		PlayerRef.PlayIdle(CompanionCommand_Interact)
+		idleAnim = CompanionCommand_Interact
 	elseif aeCommandType == 7
-		PlayerRef.PlayIdle(CompanionCommand_Hold)
+		idleAnim = CompanionCommand_Hold
+	endif
+
+	if idleAnim != NONE
+		PlayerRef.PlayIdle(idleAnim)
+		if PlayerRef.IsInPowerArmor()
+			CompanionCommandFoley_Power.Play(PlayerRef)
+		else
+			CompanionCommandFoley_Default.Play(PlayerRef)
+		endif
 	endif
 
 EndEvent
 
 ; Event received when the player begins commanding this actor.
 Event ReferenceAlias.OnCommandModeEnter(ReferenceAlias akSender)
-	Debug.Trace("Companion Command Animations: Enter mode")
+	;Debug.Trace("Companion Command Animations: Enter mode")
 	iCommandModeActive = 1
 EndEvent
 
 ; Event received when the player begins commanding this actor.
 Event ReferenceAlias.OnCommandModeExit(ReferenceAlias akSender)
-	Debug.Trace("Companion Command Animations: Exit mode")
+	;Debug.Trace("Companion Command Animations: Exit mode")
 	iCommandModeActive = -1
 EndEvent
