@@ -32,7 +32,7 @@ Event OnCommandModeGiveCommand(ObjectReference akSenderRef, int aeCommandType, O
 	endif
 
 	; Condition checks
-	if PlayerRef.IsDead() || PlayerRef.IsInScene() != 0 || PlayerRef.GetAnimationVariableBool("IsFirstPerson") == false
+	if PlayerRef.IsDead() || PlayerRef.GetAnimationVariableBool("IsFirstPerson") == false ; || PlayerRef.IsInScene()
 		return
 	endif
 
