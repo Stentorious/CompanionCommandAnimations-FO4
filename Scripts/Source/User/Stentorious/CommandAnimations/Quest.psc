@@ -13,8 +13,8 @@ Group Base
 EndGroup
 
 Group Followers
-	ReferenceAlias Property DogmeatCompanion const auto mandatory
-	ReferenceAlias Property CommandVictimAlias const auto mandatory
+	ReferenceAlias Property DogmeatCompanion Auto Const Mandatory
+	ReferenceAlias Property CommandVictimAlias Auto Const Mandatory
 EndGroup
 
 Group Mod
@@ -30,12 +30,12 @@ Group Mod
 EndGroup
 
 Group Public
-	int Property iCommandModeActive auto
+	int Property iCommandModeActive Auto
 EndGroup
 
 Group Internal
 	; mod version
-	float property fModVersion = 1.00 autoReadOnly
+	float property fModVersion = 1.00 AutoReadOnly
 EndGroup
 
 
@@ -47,9 +47,10 @@ Function OnGameLoad()
 	if modVersion < 1.00
 		Debug.Trace("Companion Command Animations: Init")
 		self.RegisterForRemoteEvent(PlayerRef, "OnPlayerLoadGame")
-		RegisterEvents(true)
 	endif
 	modVersion = fModVersion
+
+	RegisterEvents(true)
 
 	iCommandModeActive = 2
 
@@ -63,15 +64,22 @@ Function RegisterEvents(bool abRegister = true)
 		RegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeGiveCommand")
 		RegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeEnter")
 		RegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeExit")
+		RefreshModSupport()
 	else
-		UnRegisterForRemoteEvent(DogmeatCompanion, "OnCommandModeGiveCommand")
-		UnRegisterForRemoteEvent(DogmeatCompanion, "OnCommandModeEnter")
-		UnRegisterForRemoteEvent(DogmeatCompanion, "OnCommandModeExit")
-		UnRegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeGiveCommand")
-		UnRegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeEnter")
-		UnRegisterForRemoteEvent(CommandVictimAlias, "OnCommandModeExit")
+		UnRegisterForAllRemoteEvents()
 	endif
 EndFunction
+
+Function RefreshModSupport()
+	if Game.IsPluginInstalled("llamaCompanionHeatherv2.esp")	; Heather Casdin
+		Quest kQuest = Game.GetFormFromFile(0x00052049, "llamaCompanionHeatherv2.esp") as Quest
+		ReferenceAlias HeatherAlias = kQuest.GetAlias(1) as ReferenceAlias
+		RegisterForRemoteEvent(HeatherAlias, "OnCommandModeGiveCommand")
+		RegisterForRemoteEvent(HeatherAlias, "OnCommandModeEnter")
+		RegisterForRemoteEvent(HeatherAlias, "OnCommandModeExit")
+	endif
+EndFunction
+
 
 ; #### EVENTS ####
 
@@ -107,9 +115,9 @@ Event ReferenceAlias.OnCommandModeGiveCommand(ReferenceAlias akSender, int aeCom
 	; Handle generic actor commands
 	actor kCommandActor = akSender.GetActorReference()
 	if CommandVictimAlias.GetActorReference() == kCommandActor
-		Debug.Trace("Companion Command Animations: Command Victim")
+		;Debug.Trace("Companion Command Animations: Command Victim")
 		if kCommandVictimTemp != kCommandActor
-			Debug.Trace("Companion Command Animations: Command Victim (Same)")
+			;Debug.Trace("Companion Command Animations: Command Victim (Same)")
 			iCommandModeActive = 2
 			kCommandVictimTemp = kCommandActor
 		endif
@@ -124,7 +132,7 @@ Event ReferenceAlias.OnCommandModeGiveCommand(ReferenceAlias akSender, int aeCom
 	endif
 
 	; Condition checks
-	if PlayerRef.IsDead() || PlayerRef.GetAnimationVariableBool("IsFirstPerson") == false ; || PlayerRef.IsInScene()
+	if PlayerRef.IsDead(); || PlayerRef.GetAnimationVariableBool("IsFirstPerson") == false  || PlayerRef.IsInScene()
 		return
 	endif
 
