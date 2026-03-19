@@ -1,5 +1,6 @@
 meta.ini
 .vscode/
+*.ba2
 *.zip
 *.ppj
 *.code-workspace
